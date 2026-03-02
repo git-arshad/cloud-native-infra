@@ -1,0 +1,34 @@
+version: "3.9"
+
+services:
+  app:
+    build: .
+    container_name: infra-container
+    ports:
+      - "5000:5000"
+    environment:
+      DB_HOST: db
+      DB_NAME: infradb
+      DB_USER: infrauser
+      DB_PASSWORD: infra123
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15
+    container_name: infra-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: infrauser
+      POSTGRES_PASSWORD: infra123
+      POSTGRES_DB: infradb
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U infrauser -d infradb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  db-data:

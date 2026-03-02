@@ -1,26 +1,44 @@
 from flask import Flask
 import os
 import datetime
+import psycopg2
 
 app = Flask(__name__)
 
-APP_ENV = os.getenv("APP_ENV","development")
-APP_VERSION = os.getenv("APP_VERSION","1.0")
-PORT = int(os.getenv("PORT",5000))
+APP_ENV = os.getenv("APP_ENV", "development")
+APP_VERSION = os.getenv("APP_VERSION", "1.0")
+PORT = int(os.getenv("PORT", 5000))
+
 
 def log_request(endpoint):
     timestamp = datetime.datetime.utcnow().isoformat()
-    print(f"[{timestamp}] Request recieved at {endpoint}",flush=True)
-    
+    print(f"[{timestamp}] Request received at {endpoint}", flush=True)
+
+
+def check_db():
+    try:
+        conn = psycopg2.connect(
+            host=os.getenv("DB_HOST", "db"),
+            database=os.getenv("DB_NAME", "infradb"),
+            user=os.getenv("DB_USER", "infrauser"),
+            password=os.getenv("DB_PASSWORD", "infra123")
+        )
+        conn.close()
+        return "Database: Connected"
+    except Exception as e:
+        return f"Database: Not Connected ({e})"
+
 
 @app.route("/")
 def home():
     log_request("/")
     return f"""
-InfraReady Service\n
-Environment: (APP_ENV)
-Version: {APP_VERSION}
+InfraReady Service<br>
+Environment: {APP_ENV}<br>
+Version: {APP_VERSION}<br>
+{check_db()}
 """
+
 
 @app.route("/health")
 def health():
