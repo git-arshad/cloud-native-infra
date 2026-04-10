@@ -12,7 +12,12 @@ PORT = int(os.getenv("PORT", 5000))
 
 def log_request(endpoint):
     timestamp = datetime.datetime.utcnow().isoformat()
-    print(f"[{timestamp}] Request received at {endpoint}", flush=True)
+    log = {
+        "timestamp": timestamp,
+        "endpoint": endpoint,
+        "env": APP_ENV
+    }
+    print(log, flush=True)
 
 
 def check_db():
@@ -26,8 +31,11 @@ def check_db():
         conn.close()
         return "Database: Connected"
     except Exception as e:
-        return f"Database: Not Connected ({e})"
-
+        print({
+            "error": str(e),
+            "type": "db_connection_error"
+        }, flush=True)
+        return "Database: Not Connected"
 
 @app.route("/")
 def home():
