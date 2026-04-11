@@ -74,7 +74,7 @@ def health():
         return {
             "status": "unhealthy",
             "database": "disconnected"
-        }, 500
+        }, 500 #changed
 
 
 if __name__ == "__main__":
