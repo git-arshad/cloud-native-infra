@@ -51,7 +51,30 @@ Version: {APP_VERSION}<br>
 @app.route("/health")
 def health():
     log_request("/health")
-    return "OK", 200
+
+    try:
+        conn = psycopg2.connect(
+            host=os.getenv("DB_HOST", "db"),
+            database=os.getenv("DB_NAME", "infradb"),
+            user=os.getenv("DB_USER", "infrauser"),
+            password=os.getenv("DB_PASSWORD", "infra123")
+        )
+        conn.close()
+        return {
+            "status": "healthy",
+            "database": "connected"
+        }, 200
+
+    except Exception as e:
+        print({
+            "error": str(e),
+            "type": "healthcheck_failure"
+        }, flush=True)
+
+        return {
+            "status": "unhealthy",
+            "database": "disconnected"
+        }, 500
 
 
 if __name__ == "__main__":
