@@ -20,22 +20,33 @@ def log_request(endpoint):
     print(log, flush=True)
 
 
+import time
+
 def check_db():
-    try:
-        conn = psycopg2.connect(
-            host=os.getenv("DB_HOST", "db"),
-            database=os.getenv("DB_NAME", "infradb"),
-            user=os.getenv("DB_USER", "infrauser"),
-            password=os.getenv("DB_PASSWORD", "infra123")
-        )
-        conn.close()
-        return "Database: Connected"
-    except Exception as e:
-        print({
-            "error": str(e),
-            "type": "db_connection_error"
-        }, flush=True)
-        return "Database: Not Connected"
+    retries = 3
+    delay = 2  # seconds
+
+    for attempt in range(retries):
+        try:
+            conn = psycopg2.connect(
+                host=os.getenv("DB_HOST", "db"),
+                database=os.getenv("DB_NAME", "infradb"),
+                user=os.getenv("DB_USER", "infrauser"),
+                password=os.getenv("DB_PASSWORD", "infra123")
+            )
+            conn.close()
+            return "Database: Connected"
+
+        except Exception as e:
+            print({
+                "error": str(e),
+                "attempt": attempt + 1,
+                "type": "db_retry"
+            }, flush=True)
+
+            time.sleep(delay)
+
+    return "Database: Not Connected (after retries)"
 
 @app.route("/")
 def home():
