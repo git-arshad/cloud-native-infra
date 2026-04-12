@@ -1,39 +1,89 @@
-🚀 Flask + PostgreSQL — Dockerized Infrastructure
-This project showcases a production‑style containerized application built with Flask as the Python backend and PostgreSQL as the database, all orchestrated through Docker and Docker Compose. It’s designed to highlight the differences between stateful and stateless services, container networking, resilience, and how infrastructure behaves under failure conditions.
+🚀 Cloud-Based Backend System
 
-🏗 Architecture
-The flow is simple: a user interacts with the Flask application, which runs inside its own container and connects to PostgreSQL through Docker’s internal DNS (using the service name db). All data is stored in Docker volumes, ensuring persistence even if containers are deleted. Both services run on the same Docker network, automatically created by Compose, which makes communication seamless.
+This project is a simple backend system that I built to understand how real applications are deployed and run on the cloud.
 
-📂 Project Structure
-The repository is organized with a clear structure:
-- app.py — Flask application code
-- requirements.txt — Python dependencies
-- Dockerfile — Image definition for the Flask app
-- docker-compose.yml — Multi‑service orchestration
-- README.md — Documentation and usage guide
+Instead of just running code locally, this system runs on a remote server and is accessible over the internet.
 
-⚙️ Running the Project
-To start the stack, simply run:
-docker compose up --build
+🧠 What This Project Does
+Runs a backend application using Flask
+Connects to a PostgreSQL database
+Uses Docker to manage both services
+Is deployed on a cloud server
+Automatically updates when new code is pushed
 
-And to stop it:
-docker compose down
+The main goal was to learn how systems work in real environments, not just how to write code.
+
+🏗 How It Works
+User → Internet → Cloud Server
+                     ↓
+                Docker
+              /        \
+        Flask App   PostgreSQL
+The Flask app handles requests
+The database runs separately and stores data
+Both communicate inside a Docker network
 
 
-🧠 Key Concepts
-Several important infrastructure concepts are demonstrated here:
-- Container Networking: Services communicate using names like db, thanks to Docker’s internal DNS.
-- Persistence with Volumes: Database data is stored in volumes, surviving container deletion unless the volume itself is removed.
-- Healthchecks: Configured in docker-compose.yml, they track service states (starting, healthy, unhealthy) and can be verified with docker ps.
-- Restart Policies: Containers are set to restart automatically on crashes (restart: always), ensuring resilience.
-🔥 Failure Testing
-The project also explores failure scenarios:
-- Stopping a container → It restarts automatically due to the restart policy.
-- Deleting a container → It does not restart, since restart policies only apply to existing containers.
-- Database DNS failure → The app throws errors like “could not translate host name ‘db’”, revealing how critical Docker networking is.
-📊 What This Demonstrates
-Through these experiments, the project illustrates that containers are temporary, volumes make data permanent, restart policies handle crashes but not deletions, and Compose provides automatic networking. It also emphasizes resilience through exception handling and clarifies the distinction between images and containers.
-🚀 Future Improvements
-Potential next steps include adding retry logic for database connections, implementing a wait‑for‑db startup script, introducing an Nginx reverse proxy, setting up CI/CD pipelines, deploying to cloud platforms (AWS, Azure, GCP), and eventually building a Kubernetes version.
-🎯 Learning Outcome
-By working through this setup, you gain practical insight into stateful vs. stateless services, Docker networking, container lifecycles, infrastructure as code, failure handling, and production‑ready patterns.
+⚙️ Tech Used
+Python (Flask)
+PostgreSQL
+Docker & Docker Compose
+AWS EC2 (cloud server)
+GitHub Actions (for automation)
+
+
+🚀 How to Run It
+Run locally
+docker compose up -d --build
+Open:
+http://localhost:5000
+
+
+Run on cloud
+After deployment, access using:
+http://<your-public-ip>:5000
+
+
+🔁 Automatic Deployment (CI/CD)
+Once everything is set up:
+
+You push code to GitHub
+GitHub Actions runs automatically
+The server updates itself
+No manual deployment needed.
+
+
+📊 What I Focused On
+This project is not about building features.
+It focuses on:
+How services communicate
+How systems behave when something fails
+How to deploy and update applications
+How to observe logs and debug issues
+
+
+🛠 Features Implemented
+Multi-service setup (App + Database)
+Containerized using Docker
+Cloud deployment using EC2
+Automatic deployment (CI/CD)
+Basic logging and health checks
+Retry logic for handling failures
+
+
+⚠️ Limitations (What’s Missing)
+This is not a full production system yet.
+
+Missing things like:
+
+HTTPS
+Monitoring dashboards
+Load balancing
+Multiple servers (scaling)
+
+🧠 What I Learned
+How to run applications outside my local machine
+How Docker helps manage services
+How cloud servers work
+How deployments can be automated
+How to debug systems using logs
