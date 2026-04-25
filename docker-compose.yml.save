@@ -1,0 +1,10 @@
+version: "3.9"
+
+services:
+  app:
+    build: .
+    container_name: infra-container
+    restart: unless-stopped
+    environment:
+      DB_HOST: db
+      DB_NAME: infradb

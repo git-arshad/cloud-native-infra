@@ -2,11 +2,9 @@ version: "3.9"
 
 services:
   app:
-    restart: unless-stopped
     build: .
     container_name: infra-container
-    ports:
-      - "5000:5000"
+    restart: unless-stopped
     environment:
       DB_HOST: db
       DB_NAME: infradb
@@ -25,11 +23,12 @@ services:
       POSTGRES_DB: infradb
     volumes:
       - db-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U infrauser -d infradb"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+
+  nginx:
+    image: nginx:latest
+    container_name: infra-nginx
+    ports:
+      - "80:80"
 
 volumes:
   db-data:
