@@ -35,5 +35,14 @@ services:
     depends_on:
       - app
 
+  prometheus:
+    image: prom/prometheus
+    container_name: infra-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+
 volumes:
   db-data:
