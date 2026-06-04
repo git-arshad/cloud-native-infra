@@ -56,5 +56,12 @@ services:
       - /sys:/sys:ro
       - /var/lib/docker:/var/lib/docker:ro
 
+  grafana:
+    image: grafana/grafana
+    container_name: infra-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
 volumes:
   db-data:
+
