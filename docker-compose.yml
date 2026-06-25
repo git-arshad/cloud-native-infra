@@ -21,6 +21,7 @@ services:
       DB_NAME: infradb
       DB_USER: infrauser
       DB_PASSWORD: infra123
+      
     depends_on:
       - db
 

@@ -1,7 +1,14 @@
 from flask import Flask
+from prometheus_client import Counter, generate_latest
+from flask import Response
 import os
 import datetime
 import psycopg2
+
+REQUEST_COUNT = Counter(
+    "app_requests_total",
+    "Total number of requests"
+)
 
 app = Flask(__name__)
 
@@ -48,15 +55,29 @@ def check_db():
 
     return "Database: Not Connected (after retries)"
 
+
+
 @app.route("/")
 def home():
+    REQUEST_COUNT.inc()
+
     log_request("/")
+
     return f"""
-InfraReady Service<br>
-Environment: {APP_ENV}<br>
-Version: {APP_VERSION}<br>
-{check_db()}
-"""
+    InfraReady Service<br>
+    Environment: {APP_ENV}<br>
+    Version: {APP_VERSION}<br>
+    {check_db()}
+    """
+    
+    
+@app.route("/metrics")
+def metrics():
+    return Response(
+        generate_latest(),
+        mimetype="text/plain"
+    )
+
 
 
 @app.route("/health")

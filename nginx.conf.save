@@ -1,0 +1,32 @@
+e
+vents {}
+
+http {
+ events {}
+
+http {
+    server {
+        listen 80;
+
+        location / {
+            proxy_pass http://app:5000;
+        }
+    }
+}events {}
+
+http {
+    server {
+        listen 80;
+
+        location / {
+            proxy_pass http://app:5000;
+        }
+    }
+}   server {
+        listen 80;
+
+        location / {
+            proxy_pass http://app:5000;
+        }
+    }
+}
