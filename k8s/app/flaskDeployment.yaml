@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: infraready-app
+  namespace: infraready
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: infraready
+  template:
+    metadata:
+      labels:
+        app: infraready
+    spec:
+      containers:
+      - name: flask
+        image: infraready-app-app:latest
+        imagePullPolicy: IfNotPresent
+        envFrom:
+        - configMapRef:
+            name: flask-config
+        - secretRef:
+            name: flask-secret
+        ports:
+        - containerPort: 5000
+        livenessProbe:
+          httpGet:
+            path: /live
+            port: 5000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 2
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 2
+          failureThreshold: 3
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"  

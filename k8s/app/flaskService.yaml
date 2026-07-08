@@ -1,0 +1,18 @@
+apiVersion: v1
+
+kind: Service
+
+metadata:
+  name: flask-service
+  namespace: infraready
+
+spec:
+  selector:
+    app: infraready
+
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
+
+  type: NodePort

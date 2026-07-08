@@ -1,9 +1,9 @@
-from flask import Flask
+from flask import Flask, Response
 from prometheus_client import Counter, generate_latest
-from flask import Response
 import os
 import datetime
 import psycopg2
+import time
 
 REQUEST_COUNT = Counter(
     "app_requests_total",
@@ -12,9 +12,16 @@ REQUEST_COUNT = Counter(
 
 app = Flask(__name__)
 
+# Application Configuration
 APP_ENV = os.getenv("APP_ENV", "development")
 APP_VERSION = os.getenv("APP_VERSION", "1.0")
 PORT = int(os.getenv("PORT", 5000))
+
+# Database Configuration
+DB_HOST = os.getenv("DB_HOST", "db")
+DB_NAME = os.getenv("DB_NAME", "infradb")
+DB_USER = os.getenv("DB_USER", "infrauser")
+DB_PASSWORD = os.getenv("DB_PASSWORD", "infra123")
 
 
 def log_request(endpoint):
@@ -27,20 +34,22 @@ def log_request(endpoint):
     print(log, flush=True)
 
 
-import time
+def get_db_connection():
+    return psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD
+    )
+
 
 def check_db():
     retries = 3
-    delay = 2  # seconds
+    delay = 2
 
     for attempt in range(retries):
         try:
-            conn = psycopg2.connect(
-                host=os.getenv("DB_HOST", "db"),
-                database=os.getenv("DB_NAME", "infradb"),
-                user=os.getenv("DB_USER", "infrauser"),
-                password=os.getenv("DB_PASSWORD", "infra123")
-            )
+            conn = get_db_connection()
             conn.close()
             return "Database: Connected"
 
@@ -56,7 +65,6 @@ def check_db():
     return "Database: Not Connected (after retries)"
 
 
-
 @app.route("/")
 def home():
     REQUEST_COUNT.inc()
@@ -69,8 +77,8 @@ def home():
     Version: {APP_VERSION}<br>
     {check_db()}
     """
-    
-    
+
+
 @app.route("/metrics")
 def metrics():
     return Response(
@@ -79,19 +87,53 @@ def metrics():
     )
 
 
+# Liveness Probe
+@app.route("/live")
+def live():
+    log_request("/live")
 
+    return {
+        "status": "alive"
+    }, 200
+
+
+# Readiness Probe
+@app.route("/ready")
+def ready():
+
+    log_request("/ready")
+
+    try:
+        conn = get_db_connection()
+        conn.close()
+
+        return {
+            "status": "ready",
+            "database": "connected"
+        }, 200
+
+    except Exception as e:
+        print({
+            "error": str(e),
+            "type": "readiness_failure"
+        }, flush=True)
+
+        return {
+            "status": "not ready",
+            "database": "disconnected"
+        }, 503
+
+
+# General Health Endpoint
 @app.route("/health")
 def health():
+
     log_request("/health")
 
     try:
-        conn = psycopg2.connect(
-            host=os.getenv("DB_HOST", "db"),
-            database=os.getenv("DB_NAME", "infradb"),
-            user=os.getenv("DB_USER", "infrauser"),
-            password=os.getenv("DB_PASSWORD", "infra123")
-        )
+        conn = get_db_connection()
         conn.close()
+
         return {
             "status": "healthy",
             "database": "connected"
@@ -106,7 +148,7 @@ def health():
         return {
             "status": "unhealthy",
             "database": "disconnected"
-        }, 500                           # improved 
+        }, 500
 
 
 if __name__ == "__main__":
